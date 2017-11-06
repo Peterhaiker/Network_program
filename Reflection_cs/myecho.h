@@ -12,5 +12,6 @@
 
 void str_echo(int sockfd);
 void sig_chld(int signo);
+void str_cli(FILE*,int);
 
 #endif /* !MYECHO_H */

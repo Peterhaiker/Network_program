@@ -30,12 +30,19 @@ int main(int argc,char*argv[])
   servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
   servaddr.sin_port=htons(SERV_PORT);
   bind(listenfd,(struct sockaddr*)&servaddr,sizeof(servaddr));
-  Signal(SIGCHLD,sig_chld);
   listen(listenfd,LISTENQ);
+  //fix the zombie child process
+  Signal(SIGCHLD,sig_chld);
 
   for(;;){
     clilen=sizeof(cliaddr);
-    connfd=accept(listenfd,(struct sockaddr*)&cliaddr,&clilen);
+    //fix the interrupt
+    if((connfd=accept(listenfd,(struct sockaddr*)&cliaddr,&clilen))<0){
+      if(errno==EINTR)
+        continue;
+      else
+        err_sys("accept error");
+    }
     if((childpid=fork())==0){
       close(listenfd);
       str_echo(connfd);
